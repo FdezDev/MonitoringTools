@@ -13,7 +13,7 @@ function Index() {
     useEffect(() => {
         const auth = getAuth();
 
-        onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
                 // El usuario ha iniciado sesión
                 setUserEmail(user.email);
@@ -22,7 +22,25 @@ function Index() {
                 setUserEmail('');
             }
         });
+
+        // Limpia el listener cuando el componente se desmonta
+        return () => unsubscribe();
     }, []);
+
+    const handleLogout = () => {
+        const auth = getAuth();
+        auth.signOut().then(() => {
+            // Redirige al usuario a la página de inicio de sesión o a donde prefieras
+            window.location.href = "/";
+        }).catch((error) => {
+            // Manejo de errores en caso de que ocurra alguno durante el deslogueo
+            console.log(error);
+        });
+    };
+
+
+
+
 
     //parte de las card
 
@@ -63,6 +81,8 @@ function Index() {
             }
         });
     };
+
+
     const [data, setData] = useState([]);
 
     useEffect(() => {
@@ -133,8 +153,8 @@ function Index() {
 
     return (
         <div class="container-xxl w-100 mt-5 d-lg-block col-md-5 col-lg-7 col-xl-6 bg-light rounder shadow">
-            <div class="row align-items-stretch">
-                <nav class="navbar navbar-light bg-light">
+            <div class="container-xxl w-100 mt-5 d-lg-block col-md-5 col-lg-7 col-xl-6 bg-light rounder shadow">
+                <nav class="navbar navbar-ligh bg-light">
                     <div class="container-fluid">
                         <a class="navbar-brand text-primary" href="#">
                             <svg xmlns="http://www.w3.org/2000/svg" width="30" height="24" fill="currentColor" class="bi bi-code-slash" viewBox="0 0 16 16">
@@ -149,15 +169,15 @@ function Index() {
                             </svg>
                             <small className="text-black"> {data1.time}</small>
                         </a>
-                        <div class="dropdown">
-                            <button class="btn btn-outline-primary dropdown-toggle" type="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="24" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+                        <div className="dropdown">
+                            <button className="btn btn-outline-primary dropdown-toggle" type="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="24" fill="currentColor" className="bi bi-person" viewBox="0 0 16 16">
                                     <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z" />
                                 </svg>
                                 {userEmail}
                             </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                <li><a href="/" class="dropdown-item" type="button">Logout</a></li>
+                            <ul className="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                <li><button className="dropdown-item" onClick={handleLogout}><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</button></li>
                             </ul>
                         </div>
                     </div>
@@ -198,7 +218,7 @@ function Index() {
                         {error && <p>{error}</p>}
                         <form onSubmit={handleFormSubmit}>
                             <input type="date" name="searchDate" />
-                            <button class="btn btn-outline-success" type="submit"> Buscar</button>
+                            <button class="btn btn-outline-success" type="submit"><i class="bi bi-search"></i> Buscar</button>
                         </form>
 
                     </div>
@@ -215,20 +235,23 @@ function Index() {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <th scope="row">{data2.time}</th>
-                            <td class="table-primary">{data2.temperature}</td>
-                            <td class="table-danger">{data2.humidity}</td>
-                            <td class="table-warning">{data2.voltage}</td>
-                        </tr>
+                        {Object.entries(data2).map(([time, data]) => (
+                            <tr key={time}>
+                                <th scope="row">{data.time}</th>
+                                <td class="table-primary">{data.temperature}</td>
+                                <td class="table-danger">{data.humidity}</td>
+                                <td class="table-warning">{data.voltage}</td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
+
             </div>
             <div class="container-xxl w-100 mt-5 d-lg-block col-md-5 col-lg-7 col-xl-6 bg-light rounder shadow">
                 <div class="row align-items-center">
                     <div class="col">
                         <div class="card" >
-                            <div class="card-body">
+                            <div class="card-body bg-info">
                                 <h5 class="card-title">Temperatura <i class="bi bi-thermometer-snow"></i></h5>
                                 <HighchartsReact
                                     highcharts={Highcharts}
@@ -239,7 +262,7 @@ function Index() {
                     </div>
                     <div class="col">
                         <div class="card">
-                            <div class="card-body">
+                            <div class="card-body bg-danger">
                                 <h5 class="card-title">Humedad <i class="bi bi-droplet-half"></i></h5>
                                 <HighchartsReact
                                     highcharts={Highcharts}
@@ -251,7 +274,7 @@ function Index() {
                     </div>
                     <div class="col">
                         <div class="card">
-                            <div class="card-body">
+                            <div class="card-body bg-warning">
                                 <h5 class="card-title">Voltage <i class="bi bi-lightning-charge-fill"></i></h5>
                                 <HighchartsReact
                                     highcharts={Highcharts}

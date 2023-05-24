@@ -6,8 +6,8 @@ const TelegramWidget = () => {
   };
 
   return (
-    <button className="btn btn-primary" onClick={handleTelegramRedirect}>
-      <i className="bi bi-telegram"></i> Bot
+    <button className="btn btn-outline-primary" onClick={handleTelegramRedirect}>
+      <i className="bi bi-telegram"></i> Bot Telegram
     </button>
   );
 };
